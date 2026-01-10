@@ -255,10 +255,14 @@ def find_unanalyzed_issues(project: str, max_results: int = 3) -> list[dict]:
     """
     jql = f'project = "{project}" AND Sprint is EMPTY AND labels != "{ANALYZED_LABEL}" ORDER BY created DESC'
 
-    fields = "summary,status,labels,description"
-    api_path = f"/rest/api/3/search?jql={quote(jql)}&maxResults={max_results}&fields={fields}"
+    # Use new /search/jql POST endpoint
+    request_body = {
+        "jql": jql,
+        "maxResults": max_results,
+        "fields": ["summary", "status", "labels", "description"],
+    }
 
-    result = api_request(api_path)
+    result = api_request("/rest/api/3/search/jql", method="POST", data=request_body)
     issues = []
 
     for issue in result.get("issues", []):

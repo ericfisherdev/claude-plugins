@@ -46,12 +46,16 @@ def get_base_url() -> str:
     return base_url
 
 
-def api_request(path: str) -> dict:
+def api_request(path: str, method: str = "GET", data: Optional[dict] = None) -> dict:
     """Make authenticated API request to Jira."""
     url = urljoin(get_base_url(), path)
-    req = Request(url)
+    req = Request(url, method=method)
     req.add_header("Authorization", get_auth_header())
     req.add_header("Accept", "application/json")
+
+    if data:
+        req.add_header("Content-Type", "application/json")
+        req.data = json.dumps(data).encode()
 
     try:
         with urlopen(req, timeout=30) as response:
@@ -134,19 +138,21 @@ def search_issues(
     max_results: int = 20,
     order_by: Optional[str] = None,
 ) -> dict:
-    """Search for issues using JQL."""
+    """Search for issues using JQL via the new /search/jql endpoint."""
     # Add ORDER BY if not present and order_by is specified
     if order_by and "ORDER BY" not in jql.upper():
         jql = f"{jql} ORDER BY {order_by}"
     elif "ORDER BY" not in jql.upper():
         jql = f"{jql} ORDER BY updated DESC"
 
-    fields_param = ",".join(fields)
-    encoded_jql = quote(jql, safe="")
+    # Build POST request body for new /search/jql endpoint
+    request_body = {
+        "jql": jql,
+        "fields": fields,
+        "maxResults": max_results,
+    }
 
-    path = f"/rest/api/3/search?jql={encoded_jql}&fields={fields_param}&maxResults={max_results}"
-
-    result = api_request(path)
+    result = api_request("/rest/api/3/search/jql", method="POST", data=request_body)
 
     return {
         "total": result.get("total", 0),

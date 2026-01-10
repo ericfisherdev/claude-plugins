@@ -151,30 +151,37 @@ def build_jql(
 
 
 def search_issues(jql: str, max_results: int = 50) -> list[dict]:
-    """Search issues using JQL."""
+    """Search issues using JQL via the new /search/jql endpoint."""
     base_url = os.environ.get("JIRA_BASE_URL")
     if not base_url:
         raise EnvironmentError("JIRA_BASE_URL environment variable required")
 
     # Request fields including sprint for categorization
-    # Note: sprint field is from the Jira Software (Agile) API, accessed via customfield
-    fields = "summary,status,labels"
+    fields = ["summary", "status", "labels"]
 
-    api_path = "/rest/api/3/search"
+    api_path = "/rest/api/3/search/jql"
     url = urljoin(base_url, api_path)
-    url += f"?jql={quote(jql)}&maxResults={max_results}&fields={fields}"
 
-    req = Request(url)
+    # Build POST request body
+    request_body = {
+        "jql": jql,
+        "maxResults": max_results,
+        "fields": fields,
+    }
+
+    req = Request(url, method="POST")
     req.add_header("Authorization", get_auth_header())
     req.add_header("Accept", "application/json")
+    req.add_header("Content-Type", "application/json")
+    req.data = json.dumps(request_body).encode()
 
     try:
         with urlopen(req, timeout=30) as response:
             data = json.loads(response.read().decode())
             return data.get("issues", [])
     except HTTPError as e:
+        error_body = e.read().decode() if e.fp else ""
         if e.code == 400:
-            error_body = e.read().decode() if e.fp else ""
             raise ValueError(f"Invalid JQL query: {error_body}")
         elif e.code == 401:
             raise PermissionError("Authentication failed - check credentials")
