@@ -21,7 +21,7 @@ claude plugins:add ericfisherdev-plugins/jira-tools
 | Plugin | Description | Version |
 |--------|-------------|---------|
 | [jira-tools](#jira-tools) | Jira integration tools for issues, sprints, and agile workflows | 1.3.0 |
-| [confluence-tools](#confluence-tools) | Confluence integration tools for token-efficient page and folder management with caching | 1.1.0 |
+| [confluence-tools](#confluence-tools) | Confluence integration tools for token-efficient page and folder management with caching | 1.2.0 |
 
 ---
 
@@ -112,6 +112,7 @@ Confluence integration tools for managing wiki pages and folders efficiently. Us
 | `/create-folder` | Create true Confluence folders (not page containers) |
 | `/search-content` | Search Confluence using CQL with parent hierarchy info |
 | `/delete-page` | Delete pages or folders with auto-detection |
+| `/create-blog-post` | Create blog posts with markdown support |
 
 **Features:**
 - Token-efficient output with configurable truncation
@@ -145,6 +146,9 @@ Confluence integration tools for managing wiki pages and folders efficiently. Us
 
 # Delete a page or folder
 /delete-page --id 123456
+
+# Create a blog post
+/create-blog-post --space DEV --title "Sprint Retrospective" --body-file retro.md --markdown
 ```
 
 **Requirements:**
