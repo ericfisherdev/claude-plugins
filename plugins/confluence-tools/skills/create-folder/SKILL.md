@@ -1,11 +1,11 @@
 ---
 name: create-folder
-description: This skill MUST be used when the user asks to "create a Confluence folder", "make a folder in wiki", "create a page container", "organize pages", "create parent page for documents", or wants to create organizational structure in Confluence. Use this for creating folder-like pages.
+description: This skill MUST be used when the user asks to "create a Confluence folder", "make a folder in wiki", "organize pages", or wants to create organizational structure in Confluence. Creates true Confluence folders only (no fallback to pages).
 ---
 
 # Create Confluence Folder
 
-**IMPORTANT:** In Confluence, "folders" are typically created as pages that serve as organizational containers for child pages. This skill creates either a true Confluence folder (where supported) or a minimal page that acts as a folder.
+**IMPORTANT:** This skill creates true Confluence folders using the Confluence Cloud folders API. It does NOT fall back to creating pages as containers - if folder creation fails, it will provide clear error messages and suggestions.
 
 ## Quick Start
 
@@ -15,12 +15,8 @@ Use the Python script at `scripts/create_confluence_folder.py`:
 # Create folder in a space
 python scripts/create_confluence_folder.py --space DEV --title "Documentation"
 
-# Create nested folder under existing page
+# Create nested folder under existing folder
 python scripts/create_confluence_folder.py --space DEV --title "API Docs" --parent 123456
-
-# Create with description
-python scripts/create_confluence_folder.py --space DEV --title "Archives" \
-  --description "Historical documentation"
 ```
 
 ## Options
@@ -29,51 +25,36 @@ python scripts/create_confluence_folder.py --space DEV --title "Archives" \
 |--------|-------------|
 | `--space`, `-s` | Space key (required) |
 | `--title`, `-t` | Folder title (required) |
-| `--parent`, `-p` | Parent page ID (creates nested folder) |
-| `--parent-title` | Parent page title (alternative to ID) |
-| `--description`, `-d` | Brief description (shown on folder page) |
+| `--parent`, `-p` | Parent folder ID (creates nested folder) |
+| `--parent-title` | Parent folder title (alternative to ID) |
 | `--format`, `-f` | Output: compact (default), text, json |
 
-## How It Works
+## Important Notes
 
-Confluence has two approaches for folder-like organization:
+1. **True folders only** - This skill only creates true Confluence folders. It will NOT silently create pages as a fallback.
 
-### 1. Folder Content Type (Confluence Cloud)
-Where supported, creates an actual folder object that can contain pages without being a page itself.
+2. **Folder API availability** - The Confluence folders API is available in Confluence Cloud. If folder creation fails, the script will provide helpful error messages.
 
-### 2. Container Page (Fallback)
-Creates a minimal page with:
-- Title only (or optional description)
-- Serves as parent for child pages
-- Standard folder icon appearance
-
-This skill automatically uses the best available method.
+3. **Nesting folders** - When creating nested folders, the parent must be an existing folder (not a page).
 
 ## Common Workflows
 
 ### Create Documentation Structure
 ```bash
-# Create root folders
+# Create root folders in a space
 python scripts/create_confluence_folder.py --space DEV --title "Architecture"
 python scripts/create_confluence_folder.py --space DEV --title "API Documentation"
 python scripts/create_confluence_folder.py --space DEV --title "Guides"
-
-# Create nested structure
-python scripts/create_confluence_folder.py --space DEV --title "v1" --parent-title "API Documentation"
-python scripts/create_confluence_folder.py --space DEV --title "v2" --parent-title "API Documentation"
 ```
 
-### Organize Existing Content
+### Create Nested Structure
 ```bash
-# Create a folder, then move pages into it
-python scripts/create_confluence_folder.py --space DEV --title "Legacy Docs" \
-  --description "Documentation for deprecated features"
-```
+# Create a parent folder first
+python scripts/create_confluence_folder.py --space DEV --title "Documentation"
 
-### Create Archive Folder
-```bash
-python scripts/create_confluence_folder.py --space DEV --title "Archive" \
-  --description "Historical documents - read only"
+# Then create child folders under it (use the ID from the previous command)
+python scripts/create_confluence_folder.py --space DEV --title "v1" --parent 123456
+python scripts/create_confluence_folder.py --space DEV --title "v2" --parent 123456
 ```
 
 ## Output Formats
@@ -89,24 +70,26 @@ URL:https://yoursite.atlassian.net/wiki/spaces/DEV/pages/123456
 Folder Created: Documentation
 ID: 123456
 Space: DEV
-Type: page (container)
+Type: folder
 URL: https://yoursite.atlassian.net/wiki/spaces/DEV/pages/123456
 ```
 
 **json**:
 ```json
-{"id":"123456","title":"Documentation","space":"DEV","type":"page","url":"..."}
+{"id":"123456","title":"Documentation","space":"DEV","type":"folder","url":"..."}
 ```
 
-## Folder vs Page
+## Error Handling
 
-| Feature | Folder | Page |
-|---------|--------|------|
-| Contains children | Yes | Yes |
-| Has body content | Optional | Yes |
-| Appears in tree | Yes | Yes |
-| Can be edited | Limited | Full |
-| Icon | Folder icon | Page icon |
+If folder creation fails, the script will:
+1. Display a clear error message
+2. Suggest alternatives (create manually in Confluence UI, check permissions, etc.)
+3. Exit with a non-zero status code
+
+Common errors:
+- **Folder API not available** - Try creating the folder in the Confluence web UI
+- **Folder already exists** - A folder with that title already exists in this location
+- **Permission denied** - Check your Confluence permissions
 
 ## Environment Setup
 

@@ -5,7 +5,7 @@ description: This skill MUST be used when the user asks to "search Confluence", 
 
 # Search Confluence Content
 
-**IMPORTANT:** Always use this skill's Python script for searching Confluence. This skill provides CQL-based search with token-efficient output.
+**IMPORTANT:** Always use this skill's Python script for searching Confluence. This skill provides CQL-based search with token-efficient output, including parent hierarchy information.
 
 ## Quick Start
 
@@ -105,31 +105,55 @@ python scripts/search_confluence.py --contributor "john.smith" --space DEV
 **compact** (default):
 ```
 SEARCH|5|"authentication"
-HIT|123456|Authentication Guide|DEV|page
-HIT|123457|OAuth Setup|DEV|page
-HIT|123458|SSO Integration|DEV|page
+HIT|123456|Authentication Guide|DEV|page|parent:Security Docs
+HIT|123457|OAuth Setup|DEV|page|parent:Authentication Guide
+HIT|123458|SSO Integration|DEV|page|parent:Authentication Guide
 HIT|123459|Security Best Practices|DEV|page
-HIT|123460|Login Flow|DEV|page
+HIT|123460|Login Flow|DEV|page|parent:User Management
 ```
+
+Note: Parent information is included when available (e.g., `parent:Security Docs`).
 
 **text**:
 ```
 Search Results: "authentication" (5 found)
 
 1. Authentication Guide
-   ID: 123456 | Space: DEV | Type: page
+   ID: 123456 | Space: DEV | Type: page | Parent: Security Docs
    URL: https://yoursite.atlassian.net/wiki/spaces/DEV/pages/123456
 
 2. OAuth Setup
-   ID: 123457 | Space: DEV | Type: page
+   ID: 123457 | Space: DEV | Type: page | Parent: Authentication Guide
    URL: https://yoursite.atlassian.net/wiki/spaces/DEV/pages/123457
 ...
 ```
 
 **json**:
 ```json
-{"query":"authentication","count":5,"results":[{"id":"123456","title":"Authentication Guide","space":"DEV","type":"page","url":"..."},...]}"
+{
+  "query": "authentication",
+  "count": 5,
+  "results": [
+    {
+      "id": "123456",
+      "title": "Authentication Guide",
+      "space": "DEV",
+      "type": "page",
+      "url": "...",
+      "parentId": "123400",
+      "parentTitle": "Security Docs"
+    }
+  ]
+}
 ```
+
+## Parent Information
+
+Search results now include parent/hierarchy information when available:
+- **parentId** - ID of the direct parent page or folder
+- **parentTitle** - Title of the direct parent
+
+This helps understand where each result is located in the content hierarchy.
 
 ## Environment Setup
 

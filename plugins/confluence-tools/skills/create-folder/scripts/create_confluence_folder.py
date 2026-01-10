@@ -57,60 +57,26 @@ def format_json(folder: dict, base_url: str) -> str:
     return json.dumps(output)
 
 
-def create_folder_page(
-    cache: ConfluenceCache,
-    space_id: str,
-    title: str,
-    parent_id: str | None,
-    description: str | None
-) -> dict:
-    """Create a page that acts as a folder container."""
-    # Create minimal body content
-    if description:
-        body = f"<p>{description}</p>"
-    else:
-        body = "<p></p>"  # Empty paragraph - minimal content
-
-    payload = {
-        "spaceId": space_id,
-        "title": title,
-        "body": {
-            "representation": "storage",
-            "value": body
-        }
-    }
-
-    if parent_id:
-        payload["parentId"] = parent_id
-
-    result = cache._api_request("/pages", method="POST", data=payload)
-    return result
-
-
 def try_create_folder(
     cache: ConfluenceCache,
     space_id: str,
     title: str,
     parent_id: str | None
-) -> dict | None:
-    """Try to create a true folder (Confluence Cloud feature)."""
-    # Confluence v2 API supports folders in some instances
-    # This is a newer feature and may not be available everywhere
-    try:
-        payload = {
-            "spaceId": space_id,
-            "title": title,
-            "type": "folder"
-        }
+) -> dict:
+    """Create a true folder (Confluence Cloud feature).
 
-        if parent_id:
-            payload["parentId"] = parent_id
+    Raises RuntimeError if folder creation fails.
+    """
+    payload = {
+        "spaceId": space_id,
+        "title": title,
+    }
 
-        result = cache._api_request("/folders", method="POST", data=payload)
-        return result
-    except RuntimeError:
-        # Folder API not available, fall back to page
-        return None
+    if parent_id:
+        payload["parentId"] = parent_id
+
+    result = cache._api_request("/folders", method="POST", data=payload)
+    return result
 
 
 def main():
@@ -133,11 +99,7 @@ def main():
     )
     parser.add_argument(
         "--parent-title",
-        help="Parent page title (alternative to --parent)"
-    )
-    parser.add_argument(
-        "--description", "-d",
-        help="Brief description for folder page"
+        help="Parent page/folder title (alternative to --parent)"
     )
     parser.add_argument(
         "--format", "-f",
@@ -179,21 +141,15 @@ def main():
                 print(f"ERROR: Parent page '{args.parent_title}' not found in space {args.space}", file=sys.stderr)
                 sys.exit(1)
 
-        # Try to create true folder first, fall back to page
+        # Create true folder (no fallback to pages)
         result = try_create_folder(cache, space_id, args.title, parent_id)
-        folder_type = "folder"
-
-        if not result:
-            # Fall back to creating a page as folder
-            result = create_folder_page(cache, space_id, args.title, parent_id, args.description)
-            folder_type = "page (container)"
 
         folder_data = {
             "id": result["id"],
             "title": result.get("title", args.title),
             "space": args.space,
             "parentId": parent_id,
-            "type": folder_type,
+            "type": "folder",
         }
 
         # Invalidate cache
@@ -213,7 +169,18 @@ def main():
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
     except RuntimeError as e:
-        print(f"ERROR: {e}", file=sys.stderr)
+        error_str = str(e)
+        if "404" in error_str or "not found" in error_str.lower():
+            print("ERROR: Folder creation failed. The Confluence folders API may not be available.", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("Suggestions:", file=sys.stderr)
+            print("  1. Create the folder manually in Confluence UI", file=sys.stderr)
+            print("  2. Check if folders are enabled for this space", file=sys.stderr)
+            print("  3. Verify parent ID exists and is a valid folder", file=sys.stderr)
+        elif "already exists" in error_str.lower() or "duplicate" in error_str.lower():
+            print(f"ERROR: A folder with title '{args.title}' already exists in this location", file=sys.stderr)
+        else:
+            print(f"ERROR: Failed to create folder: {e}", file=sys.stderr)
         sys.exit(1)
     except ConnectionError as e:
         print(f"ERROR: {e}", file=sys.stderr)

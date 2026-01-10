@@ -25,92 +25,158 @@ from confluence_cache import ConfluenceCache
 
 # Preset configurations
 PRESETS = {
-    "minimal": ["id", "title"],
-    "standard": ["id", "title", "status", "createdAt"],
-    "full": ["id", "title", "status", "createdAt", "childCount"],
+    "minimal": ["id", "title", "type"],
+    "standard": ["id", "title", "type", "status", "createdAt"],
+    "full": ["id", "title", "type", "status", "createdAt", "childCount"],
 }
 
 
-def fetch_pages_recursive(
+def get_folder_children(cache: ConfluenceCache, folder_id: str) -> list[dict]:
+    """Get children of a folder (pages and subfolders) using CQL search."""
+    from urllib.parse import quote
+
+    try:
+        # Use v1 CQL search to find children of the folder
+        cql = f'parent={folder_id}'
+        encoded_cql = quote(cql)
+        result = cache._api_request(
+            f"/content/search?cql={encoded_cql}&limit=100",
+            api_version="v1"
+        )
+
+        children = []
+        for item in result.get("results", []):
+            children.append({
+                "id": item["id"],
+                "title": item["title"],
+                "type": item.get("type", "page"),
+                "status": item.get("status", "current"),
+                "createdAt": item.get("createdAt", ""),
+            })
+        return children
+    except RuntimeError:
+        return []
+
+
+def detect_content_type(cache: ConfluenceCache, content_id: str) -> str | None:
+    """Detect if content ID is a page or folder."""
+    # Try page first
+    try:
+        cache._api_request(f"/pages/{content_id}")
+        return "page"
+    except RuntimeError:
+        pass
+
+    # Try folder
+    try:
+        cache._api_request(f"/folders/{content_id}")
+        return "folder"
+    except RuntimeError:
+        pass
+
+    return None
+
+
+def fetch_content_recursive(
     cache: ConfluenceCache,
     space_key: str,
     parent_id: str | None,
+    parent_type: str | None,
     depth: int,
     current_depth: int,
     force_refresh: bool
 ) -> list[dict]:
-    """Recursively fetch pages up to specified depth."""
+    """Recursively fetch pages and folders up to specified depth."""
     if current_depth > depth:
         return []
 
+    items = []
+
     if parent_id:
-        pages = cache.get_page_children(parent_id, force_refresh=force_refresh)
+        # Determine parent type if not provided
+        if not parent_type:
+            parent_type = detect_content_type(cache, parent_id)
+
+        if parent_type == "folder":
+            items = get_folder_children(cache, parent_id)
+        else:
+            # Parent is a page, get page children
+            pages = cache.get_page_children(parent_id, force_refresh=force_refresh)
+            items = [{"type": "page", **p} for p in pages]
     else:
+        # Root level - get pages in space
         pages = cache.get_pages_in_space(space_key, parent_id=None, force_refresh=force_refresh)
+        items = [{"type": "page", **p} for p in pages]
 
     result = []
-    for page in pages:
-        page_data = page.copy()
+    for item in items:
+        item_data = item.copy()
         if current_depth < depth:
-            children = fetch_pages_recursive(
-                cache, space_key, page["id"],
+            children = fetch_content_recursive(
+                cache, space_key, item["id"], item.get("type"),
                 depth, current_depth + 1, force_refresh
             )
-            page_data["children"] = children
-        result.append(page_data)
+            item_data["children"] = children
+        result.append(item_data)
 
     return result
 
 
 def format_compact(pages: list[dict], space_key: str, fields: list[str]) -> str:
-    """Format pages as compact output."""
+    """Format pages and folders as compact output."""
     lines = []
 
-    # Count total pages
-    def count_pages(page_list: list) -> int:
-        total = len(page_list)
-        for p in page_list:
-            total += count_pages(p.get("children", []))
+    # Count total items
+    def count_items(item_list: list) -> int:
+        total = len(item_list)
+        for p in item_list:
+            total += count_items(p.get("children", []))
         return total
 
-    total = count_pages(pages)
-    lines.append(f"PAGES|{space_key}|{total}")
+    total = count_items(pages)
+    lines.append(f"ITEMS|{space_key}|{total}")
 
-    def add_pages(page_list: list, indent: int = 0):
-        for p in page_list:
-            parts = ["PAGE"]
+    def add_items(item_list: list, indent: int = 0):
+        for p in item_list:
+            item_type = p.get("type", "page").upper()
+            parts = [item_type]
             for field in fields:
                 if field == "childCount":
                     parts.append(str(len(p.get("children", []))))
+                elif field == "type":
+                    continue  # Already included as the first part
                 else:
                     parts.append(str(p.get(field, "")))
             prefix = "  " * indent if indent > 0 else ""
             lines.append(prefix + "|".join(parts))
             if p.get("children"):
-                add_pages(p["children"], indent + 1)
+                add_items(p["children"], indent + 1)
 
-    add_pages(pages)
+    add_items(pages)
     return "\n".join(lines)
 
 
 def format_tree(pages: list[dict], space_key: str) -> str:
-    """Format pages as tree structure."""
+    """Format pages as tree structure with type indicators."""
     lines = []
 
-    def count_pages(page_list: list) -> int:
-        total = len(page_list)
-        for p in page_list:
-            total += count_pages(p.get("children", []))
+    def count_items(item_list: list) -> int:
+        total = len(item_list)
+        for p in item_list:
+            total += count_items(p.get("children", []))
         return total
 
-    total = count_pages(pages)
-    lines.append(f"Space: {space_key} ({total} pages)")
+    total = count_items(pages)
+    lines.append(f"Space: {space_key} ({total} items)")
 
-    def add_tree(page_list: list, prefix: str = "", is_last_list: bool = True):
-        for i, p in enumerate(page_list):
-            is_last = i == len(page_list) - 1
+    def add_tree(item_list: list, prefix: str = "", is_last_list: bool = True):
+        for i, p in enumerate(item_list):
+            is_last = i == len(item_list) - 1
             connector = "└── " if is_last else "├── "
-            lines.append(f"{prefix}{connector}{p['title']} ({p['id']})")
+            # Add type indicator: [F] for folder, [P] for page
+            item_type = p.get("type", "page")
+            type_indicator = "[F]" if item_type == "folder" else "[P]"
+            lines.append(f"{prefix}{connector}{type_indicator} {p['title']} ({p['id']})")
 
             if p.get("children"):
                 extension = "    " if is_last else "│   "
@@ -221,22 +287,26 @@ def main():
                     print(f"ERROR: Space '{args.space}' not found", file=sys.stderr)
                     sys.exit(1)
 
-        # Fetch pages
-        pages = fetch_pages_recursive(
+        # Fetch pages and folders
+        items = fetch_content_recursive(
             cache,
             space_key,
             args.parent,
-            depth,
+            parent_type=None,  # Auto-detect
+            depth=depth,
             current_depth=1,
             force_refresh=args.no_cache
         )
 
-        if not pages:
+        if not items:
             if args.parent:
-                print(f"No child pages found under page {args.parent}", file=sys.stderr)
+                print(f"No children found under {args.parent}", file=sys.stderr)
             else:
-                print(f"No pages found in space {args.space}", file=sys.stderr)
+                print(f"No content found in space {args.space}", file=sys.stderr)
             sys.exit(0)
+
+        # Rename for compatibility with existing formatting functions
+        pages = items
 
         # Get fields from preset
         fields = PRESETS[args.preset]

@@ -75,7 +75,12 @@ def format_compact(results: list[dict], query: str | None, base_url: str) -> str
     for r in results:
         space = r.get("space", "")
         content_type = r.get("type", "page")
-        lines.append(f"HIT|{r['id']}|{r['title']}|{space}|{content_type}")
+        parent = r.get("parentTitle", "")
+        # Include parent in output if available
+        if parent:
+            lines.append(f"HIT|{r['id']}|{r['title']}|{space}|{content_type}|parent:{parent}")
+        else:
+            lines.append(f"HIT|{r['id']}|{r['title']}|{space}|{content_type}")
 
     return "\n".join(lines)
 
@@ -91,9 +96,13 @@ def format_text(results: list[dict], query: str | None, base_url: str) -> str:
         space = r.get("space", "")
         content_type = r.get("type", "page")
         url = r.get("url", f"{base_url}/wiki/spaces/{space}/pages/{r['id']}")
+        parent = r.get("parentTitle", "")
 
         lines.append(f"{i}. {r['title']}")
-        lines.append(f"   ID: {r['id']} | Space: {space} | Type: {content_type}")
+        info_line = f"   ID: {r['id']} | Space: {space} | Type: {content_type}"
+        if parent:
+            info_line += f" | Parent: {parent}"
+        lines.append(info_line)
         lines.append(f"   URL: {url}")
         lines.append("")
 
@@ -185,9 +194,10 @@ def main():
         )
 
         # Execute search using v1 API (CQL search)
+        # Include ancestors for parent info
         encoded_cql = quote(cql)
         result = cache._api_request(
-            f"/content/search?cql={encoded_cql}&limit={args.limit}",
+            f"/content/search?cql={encoded_cql}&limit={args.limit}&expand=ancestors,space",
             api_version="v1"
         )
 
@@ -196,20 +206,39 @@ def main():
         for r in result.get("results", []):
             space_key = r.get("space", {}).get("key", "")
             page_id = r["id"]
+            content_type = r.get("type", "page")
 
-            # Build URL
-            if r.get("type") == "blogpost":
+            # Build URL based on type
+            if content_type == "blogpost":
                 url = f"{base_url}/wiki/spaces/{space_key}/blog/{page_id}"
+            elif content_type == "folder":
+                url = f"{base_url}/wiki/spaces/{space_key}/folders/{page_id}"
             else:
                 url = f"{base_url}/wiki/spaces/{space_key}/pages/{page_id}"
 
-            results.append({
+            # Get parent info if available
+            ancestors = r.get("ancestors", [])
+            parent_title = None
+            parent_id = None
+            if ancestors:
+                # Last ancestor is the direct parent
+                parent = ancestors[-1]
+                parent_title = parent.get("title", "")
+                parent_id = parent.get("id", "")
+
+            result_item = {
                 "id": page_id,
                 "title": r["title"],
                 "space": space_key,
-                "type": r.get("type", "page"),
+                "type": content_type,
                 "url": url
-            })
+            }
+
+            if parent_id:
+                result_item["parentId"] = parent_id
+                result_item["parentTitle"] = parent_title
+
+            results.append(result_item)
 
         if not results:
             print(f"No results found for: {args.query or '(criteria)'}", file=sys.stderr)
