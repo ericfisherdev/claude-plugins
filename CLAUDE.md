@@ -30,6 +30,20 @@ All plugins must be registered in `.claude-plugin/marketplace.json` with:
 - `version`: Semantic version
 - `keywords`: Searchable tags
 
+### Versioning
+
+Version numbers must be incremented for every commit that modifies a plugin:
+
+| Change Type | Version Bump | Example |
+|-------------|--------------|---------|
+| Skill updates (bug fixes, improvements) | +0.0.1 | 1.3.0 → 1.3.1 |
+| New skills added | +0.1.0 | 1.3.1 → 1.4.0 |
+
+Update versions in all three locations:
+1. `plugins/{plugin-name}/.claude-plugin/plugin.json`
+2. `.claude-plugin/marketplace.json`
+3. `README.md` (version table)
+
 ### Command Structure
 
 Commands are markdown files with YAML frontmatter:
