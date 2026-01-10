@@ -1,10 +1,29 @@
 {
   "name": "jira-tools",
-  "version": "1.0.0",
-  "description": "Jira integration tools for fetching and managing issue information efficiently",
+  "version": "1.3.0",
+  "description": "Jira integration tools for fetching and managing issues, sprints, and agile workflows efficiently",
   "author": {
     "name": "MBC Development Team"
   },
   "license": "MIT",
-  "keywords": ["jira", "atlassian", "issues", "tickets", "workflow", "project-management"]
+  "keywords": [
+    "jira",
+    "atlassian",
+    "issues",
+    "tickets",
+    "workflow",
+    "project-management",
+    "time-tracking",
+    "worklog",
+    "issue-links",
+    "watchers",
+    "jql",
+    "search",
+    "sprint",
+    "agile",
+    "scrum",
+    "velocity",
+    "backlog",
+    "board"
+  ]
 }
