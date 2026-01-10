@@ -11,8 +11,9 @@
 
 | Option | Short | Type | Default | Description |
 |--------|-------|------|---------|-------------|
-| `--body` | `-b` | string | empty | Page body in Confluence storage format (HTML) |
+| `--body` | `-b` | string | empty | Page body in Confluence storage format (HTML) or markdown |
 | `--body-file` | - | path | - | Read body content from file (use '-' for stdin) |
+| `--markdown` | `-m` | flag | false | Convert body content from markdown to Confluence format |
 | `--parent` | `-p` | string | - | Parent page ID (creates as child page) |
 | `--parent-title` | - | string | - | Parent page title (alternative to --parent) |
 | `--labels` | `-l` | string | - | Comma-separated labels to add |

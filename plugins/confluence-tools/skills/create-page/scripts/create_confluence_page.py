@@ -20,6 +20,7 @@ from pathlib import Path
 # Add shared module to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "shared"))
 from confluence_cache import ConfluenceCache
+from markdown_converter import markdown_to_confluence
 
 
 def format_compact(page: dict, base_url: str) -> str:
@@ -73,11 +74,16 @@ def main():
     parser.add_argument(
         "--body", "-b",
         default="",
-        help="Page body in storage format (HTML)"
+        help="Page body in storage format (HTML) or markdown (with --markdown)"
     )
     parser.add_argument(
         "--body-file",
         help="Read body content from file (use '-' for stdin)"
+    )
+    parser.add_argument(
+        "--markdown", "-m",
+        action="store_true",
+        help="Treat body content as markdown and convert to Confluence format"
     )
     parser.add_argument(
         "--parent", "-p",
@@ -130,6 +136,10 @@ def main():
             else:
                 with open(args.body_file, "r") as f:
                     body = f.read()
+
+        # Convert markdown to Confluence format if requested
+        if args.markdown and body:
+            body = markdown_to_confluence(body)
 
         # Resolve parent
         parent_id = args.parent

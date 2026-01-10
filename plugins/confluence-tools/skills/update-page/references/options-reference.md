@@ -17,6 +17,7 @@ At least one update option is required.
 | `--title` | `-t` | string | New page title |
 | `--body` | `-b` | string | New page body (replaces existing content) |
 | `--body-file` | - | path | Read body from file (use '-' for stdin) |
+| `--markdown` | `-m` | flag | Convert body/append/prepend from markdown to Confluence format |
 | `--append` | `-a` | string | Append content to existing body |
 | `--prepend` | - | string | Prepend content to existing body |
 

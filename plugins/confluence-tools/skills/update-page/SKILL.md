@@ -18,6 +18,9 @@ python scripts/update_confluence_page.py 123456 --title "New Title"
 # Update page body
 python scripts/update_confluence_page.py 123456 --body "<p>New content</p>"
 
+# Update from markdown file (automatically converted)
+python scripts/update_confluence_page.py 123456 --body-file /path/to/README.md --markdown
+
 # Append content to existing page
 python scripts/update_confluence_page.py 123456 --append "<p>Additional content</p>"
 
@@ -36,6 +39,7 @@ python scripts/update_confluence_page.py 123456 --remove-labels "draft"
 | `--title`, `-t` | New page title |
 | `--body`, `-b` | New page body (replaces existing) |
 | `--body-file` | Read body from file (use '-' for stdin) |
+| `--markdown`, `-m` | Convert body/append/prepend from markdown to Confluence format |
 | `--append`, `-a` | Append content to existing body |
 | `--prepend` | Prepend content to existing body |
 | `--labels`, `-l` | Set labels (replaces existing) |
@@ -90,7 +94,10 @@ python scripts/update_confluence_page.py 123456 --labels "final,published"
 
 ### Update from Markdown
 ```bash
-# Convert and update
+# Native markdown support (recommended)
+python scripts/update_confluence_page.py 123456 --body-file updated-docs.md --markdown
+
+# Alternative: via pandoc for advanced markdown features
 pandoc -f markdown -t html updated-docs.md | \
   python scripts/update_confluence_page.py 123456 --body-file -
 ```

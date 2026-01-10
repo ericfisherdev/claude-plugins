@@ -20,6 +20,7 @@ from pathlib import Path
 # Add shared module to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "shared"))
 from confluence_cache import ConfluenceCache
+from markdown_converter import markdown_to_confluence
 
 
 def format_compact(page: dict, changes: list[str], base_url: str) -> str:
@@ -75,6 +76,11 @@ def main():
     parser.add_argument(
         "--body-file",
         help="Read body from file (use '-' for stdin)"
+    )
+    parser.add_argument(
+        "--markdown", "-m",
+        action="store_true",
+        help="Treat body/append/prepend content as markdown and convert to Confluence format"
     )
     parser.add_argument(
         "--append", "-a",
@@ -159,15 +165,27 @@ def main():
             else:
                 with open(args.body_file, "r") as f:
                     new_body = f.read()
+            # Convert markdown if requested
+            if args.markdown:
+                new_body = markdown_to_confluence(new_body)
             changes.append("body")
         elif args.body:
             new_body = args.body
+            # Convert markdown if requested
+            if args.markdown:
+                new_body = markdown_to_confluence(new_body)
             changes.append("body")
         elif args.append:
-            new_body = current_body + args.append
+            append_content = args.append
+            if args.markdown:
+                append_content = markdown_to_confluence(append_content)
+            new_body = current_body + append_content
             changes.append("append")
         elif args.prepend:
-            new_body = args.prepend + current_body
+            prepend_content = args.prepend
+            if args.markdown:
+                prepend_content = markdown_to_confluence(prepend_content)
+            new_body = prepend_content + current_body
             changes.append("prepend")
 
         # Determine new title

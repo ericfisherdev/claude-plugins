@@ -19,6 +19,10 @@ python scripts/create_confluence_page.py --space DEV --title "New Feature Spec"
 python scripts/create_confluence_page.py --space DEV --title "API Docs" \
   --body "<p>API documentation content here</p>"
 
+# Create from markdown file (automatically converted)
+python scripts/create_confluence_page.py --space DEV --title "README" \
+  --body-file /path/to/README.md --markdown
+
 # Create under a parent page
 python scripts/create_confluence_page.py --space DEV --title "Child Page" \
   --parent 123456
@@ -34,8 +38,9 @@ python scripts/create_confluence_page.py --space DEV --title "README" \
 |--------|-------------|
 | `--space`, `-s` | Space key (required) |
 | `--title`, `-t` | Page title (required) |
-| `--body`, `-b` | Page body in storage format (HTML) |
+| `--body`, `-b` | Page body in storage format (HTML) or markdown |
 | `--body-file` | Read body content from file |
+| `--markdown`, `-m` | Convert body content from markdown to Confluence format |
 | `--parent`, `-p` | Parent page ID (creates under this page) |
 | `--parent-title` | Parent page title (alternative to ID) |
 | `--labels`, `-l` | Comma-separated labels to add |
@@ -104,9 +109,13 @@ python scripts/create_confluence_page.py \
   --body "<p>Decision: Use microservices</p>"
 ```
 
-### Create from Markdown (via pandoc)
+### Create from Markdown
 ```bash
-# Convert markdown to Confluence storage format
+# Native markdown support (recommended)
+python scripts/create_confluence_page.py \
+  --space DEV --title "README" --body-file README.md --markdown
+
+# Alternative: via pandoc for advanced markdown features
 pandoc -f markdown -t html README.md | \
   python scripts/create_confluence_page.py \
     --space DEV --title "README" --body-file -
