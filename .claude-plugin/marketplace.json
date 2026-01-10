@@ -11,6 +11,13 @@
       "description": "Jira integration tools for token-efficient issue retrieval with truncation options",
       "version": "1.0.0",
       "keywords": ["jira", "atlassian", "issues", "tickets", "workflow", "project-management"]
+    },
+    {
+      "name": "confluence-tools",
+      "source": "./plugins/confluence-tools",
+      "description": "Confluence integration tools for token-efficient page management with caching",
+      "version": "1.0.0",
+      "keywords": ["confluence", "atlassian", "wiki", "documentation", "pages", "knowledge-base"]
     }
   ]
 }
