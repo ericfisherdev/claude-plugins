@@ -8,9 +8,9 @@
     {
       "name": "jira-tools",
       "source": "./plugins/jira-tools",
-      "description": "Jira integration tools for token-efficient issue retrieval with truncation options",
-      "version": "1.0.0",
-      "keywords": ["jira", "atlassian", "issues", "tickets", "workflow", "project-management"]
+      "description": "Jira integration tools for issues, sprints, and agile workflows",
+      "version": "1.3.0",
+      "keywords": ["jira", "atlassian", "issues", "tickets", "workflow", "project-management", "sprint", "agile", "scrum", "backlog"]
     },
     {
       "name": "confluence-tools",

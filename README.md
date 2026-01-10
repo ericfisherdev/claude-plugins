@@ -20,7 +20,7 @@ claude plugins:add ericfisherdev-plugins/jira-tools
 
 | Plugin | Description | Version |
 |--------|-------------|---------|
-| [jira-tools](#jira-tools) | Jira integration tools for token-efficient issue retrieval with truncation options | 1.0.0 |
+| [jira-tools](#jira-tools) | Jira integration tools for issues, sprints, and agile workflows | 1.3.0 |
 | [confluence-tools](#confluence-tools) | Confluence integration tools for token-efficient page and folder management with caching | 1.1.0 |
 
 ---
@@ -29,34 +29,44 @@ claude plugins:add ericfisherdev-plugins/jira-tools
 
 ### jira-tools
 
-Jira integration tools for fetching and managing issue information efficiently. Uses shared caching to reduce API calls and provides token-efficient output.
+Jira integration tools for managing issues, sprints, and agile workflows. Uses shared caching to reduce API calls and provides token-efficient output.
 
 **Skills:**
 
 | Skill | Description |
 |-------|-------------|
 | `/jira-issue` | Fetch single issue details with preset-based truncation |
-| `/backlog-summary` | Get token-efficient summary of multiple issues with sprint-aware caching |
 | `/create-issue` | Create Jira issues with cached metadata lookups |
 | `/update-issue` | Update issues (status, assignee, labels, comments) |
+| `/search-issues` | Search issues using JQL queries |
+| `/link-issues` | Create relationships between issues (blocks, duplicates, etc.) |
+| `/watch-issue` | Add/remove watchers on issues |
+| `/log-work` | Log time entries on issues |
+| `/backlog-summary` | Get summary of backlog or sprint issues |
 | `/issue-analysis` | Analyze an issue and create implementation plans |
 | `/analyze-backlog` | Auto-analyze top 3 unanalyzed backlog issues |
+| `/sprint-info` | Get sprint details and issue list |
+| `/sprint-report` | Get sprint metrics, velocity, and burndown |
+| `/manage-sprint` | Create, start, or complete sprints |
+| `/move-to-sprint` | Move issues between sprints or backlog |
 
 **Features:**
 - Token-efficient output with configurable truncation
 - Preset profiles (minimal, standard, full) for common use cases
 - Sprint-aware caching with different TTLs per category
 - Shared cache for metadata (users, priorities, components)
+- Full agile/scrum workflow support
+- JQL-based search capabilities
 - Human-readable names instead of IDs
 
 **Usage Examples:**
 
 ```bash
-# Fetch issue with minimal output (~20 tokens)
+# Fetch issue with minimal output
 /jira-issue PROJ-123 --preset minimal
 
-# Get backlog summary
-/backlog-summary PROJ --scope backlog
+# Search for bugs assigned to me
+/search-issues --jql "project = PROJ AND type = Bug AND assignee = currentUser()"
 
 # Create a bug
 /create-issue --project PROJ --type Bug --summary "Login fails"
@@ -64,11 +74,17 @@ Jira integration tools for fetching and managing issue information efficiently. 
 # Update issue status
 /update-issue PROJ-123 --status "In Progress"
 
+# Log 2 hours of work
+/log-work PROJ-123 --time 2h --comment "Fixed authentication"
+
+# Get current sprint info
+/sprint-info --board 42 --sprint active
+
+# Move issue to current sprint
+/move-to-sprint PROJ-123 --sprint 100
+
 # Analyze an issue for implementation
 /issue-analysis PROJ-123
-
-# Auto-analyze unanalyzed backlog items
-/analyze-backlog PROJ
 ```
 
 **Requirements:**
