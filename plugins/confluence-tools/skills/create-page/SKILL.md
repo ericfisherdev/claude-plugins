@@ -7,6 +7,26 @@ description: This skill MUST be used when the user asks to "create a Confluence 
 
 **IMPORTANT:** Always use this skill's Python script for creating Confluence pages. This skill uses caching for space lookups and provides token-efficient output.
 
+## Markdown Content Handling
+
+**CRITICAL:** When uploading markdown content to Confluence, you MUST use the `--markdown` flag:
+
+- **Files with `.md` extension** → ALWAYS add `--markdown`
+- **Content containing markdown syntax** (headers with #, lists with -, code blocks with ```) → ALWAYS add `--markdown`
+- **User asks to upload/publish a markdown file** → ALWAYS add `--markdown`
+
+Without the `--markdown` flag, markdown content will appear as raw unformatted text in Confluence.
+
+```bash
+# CORRECT - markdown file with --markdown flag
+python scripts/create_confluence_page.py --space DEV --title "Docs" \
+  --body-file README.md --markdown
+
+# WRONG - markdown will show as raw text
+python scripts/create_confluence_page.py --space DEV --title "Docs" \
+  --body-file README.md
+```
+
 ## Quick Start
 
 Use the Python script at `scripts/create_confluence_page.py`:

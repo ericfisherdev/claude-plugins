@@ -7,6 +7,24 @@ description: This skill MUST be used when the user asks to "update a Confluence 
 
 **IMPORTANT:** Always use this skill's Python script for updating Confluence pages. This skill handles version management automatically and provides token-efficient output.
 
+## Markdown Content Handling
+
+**CRITICAL:** When uploading markdown content to Confluence, you MUST use the `--markdown` flag:
+
+- **Files with `.md` extension** → ALWAYS add `--markdown`
+- **Content containing markdown syntax** (headers with #, lists with -, code blocks with ```) → ALWAYS add `--markdown`
+- **User asks to upload/update with a markdown file** → ALWAYS add `--markdown`
+
+Without the `--markdown` flag, markdown content will appear as raw unformatted text in Confluence.
+
+```bash
+# CORRECT - markdown file with --markdown flag
+python scripts/update_confluence_page.py 123456 --body-file README.md --markdown
+
+# WRONG - markdown will show as raw text
+python scripts/update_confluence_page.py 123456 --body-file README.md
+```
+
 ## Quick Start
 
 Use the Python script at `scripts/update_confluence_page.py`:
