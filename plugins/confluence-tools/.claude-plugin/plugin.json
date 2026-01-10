@@ -2,6 +2,8 @@
   "name": "confluence-tools",
   "version": "1.0.0",
   "description": "Confluence integration tools for token-efficient page management with caching",
-  "author": "ericfisherdev",
+  "author": {
+    "name": "ericfisherdev"
+  },
   "keywords": ["confluence", "atlassian", "wiki", "documentation", "pages"]
 }
