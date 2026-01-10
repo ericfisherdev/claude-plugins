@@ -20,7 +20,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 # Add shared module to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "shared"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "shared"))
 from confluence_cache import ConfluenceCache
 
 
