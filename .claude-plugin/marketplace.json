@@ -16,7 +16,7 @@
       "name": "confluence-tools",
       "source": "./plugins/confluence-tools",
       "description": "Confluence integration tools for token-efficient page and folder management with caching",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "keywords": ["confluence", "atlassian", "wiki", "documentation", "pages", "knowledge-base", "blog"]
     }
   ]

@@ -150,16 +150,17 @@ def main():
             "space": args.space,
         }
 
-        # Add labels if specified
+        # Add labels if specified (uses v1 API as v2 doesn't support blogpost labels)
         if args.labels:
             label_list = [l.strip() for l in args.labels.split(",") if l.strip()]
             if label_list:
-                label_payload = [{"name": label} for label in label_list]
+                label_payload = [{"prefix": "global", "name": label} for label in label_list]
                 try:
                     cache._api_request(
-                        f"/blogposts/{result['id']}/labels",
+                        f"/content/{result['id']}/label",
                         method="POST",
-                        data=label_payload
+                        data=label_payload,
+                        api_version="v1"
                     )
                 except RuntimeError as e:
                     print(f"Warning: Failed to add labels: {e}", file=sys.stderr)
