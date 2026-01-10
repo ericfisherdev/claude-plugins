@@ -1,7 +1,7 @@
 {
   "name": "confluence-tools",
-  "version": "1.0.0",
-  "description": "Confluence integration tools for token-efficient page management with caching",
+  "version": "1.1.0",
+  "description": "Confluence integration tools for token-efficient page and folder management with caching",
   "author": {
     "name": "ericfisherdev"
   },

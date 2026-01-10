@@ -21,7 +21,7 @@ claude plugins:add ericfisherdev-plugins/jira-tools
 | Plugin | Description | Version |
 |--------|-------------|---------|
 | [jira-tools](#jira-tools) | Jira integration tools for token-efficient issue retrieval with truncation options | 1.0.0 |
-| [confluence-tools](#confluence-tools) | Confluence integration tools for token-efficient page management with caching | 1.0.0 |
+| [confluence-tools](#confluence-tools) | Confluence integration tools for token-efficient page and folder management with caching | 1.1.0 |
 
 ---
 
@@ -83,22 +83,25 @@ Jira integration tools for fetching and managing issue information efficiently. 
 
 ### confluence-tools
 
-Confluence integration tools for managing wiki pages efficiently. Uses shared caching to reduce API calls and provides token-efficient output.
+Confluence integration tools for managing wiki pages and folders efficiently. Uses shared caching to reduce API calls and provides token-efficient output.
 
 **Skills:**
 
 | Skill | Description |
 |-------|-------------|
 | `/confluence-page` | Fetch single page details with preset-based truncation |
-| `/list-pages` | List pages in a space or under a parent with tree view |
+| `/list-pages` | List pages and folders in a space with type indicators (`[F]`/`[P]`) |
 | `/create-page` | Create Confluence pages with storage format support |
 | `/update-page` | Update pages (title, body, labels) with version management |
-| `/create-folder` | Create folder-like pages for organization |
-| `/search-content` | Search Confluence using CQL queries |
+| `/create-folder` | Create true Confluence folders (not page containers) |
+| `/search-content` | Search Confluence using CQL with parent hierarchy info |
+| `/delete-page` | Delete pages or folders with auto-detection |
 
 **Features:**
 - Token-efficient output with configurable truncation
 - Preset profiles (minimal, standard, full) for common use cases
+- Full folder support with type indicators in tree views
+- Parent hierarchy information in search results
 - Shared cache for spaces, pages, and labels
 - Automatic version management for updates
 - CQL-based search with multiple filters
@@ -109,7 +112,7 @@ Confluence integration tools for managing wiki pages efficiently. Uses shared ca
 # Fetch page with minimal output
 /confluence-page 123456 --preset minimal
 
-# List pages in a space as tree
+# List pages and folders as tree with type indicators
 /list-pages --space DEV --depth 2 --format tree
 
 # Create a new page
@@ -118,11 +121,14 @@ Confluence integration tools for managing wiki pages efficiently. Uses shared ca
 # Update page content
 /update-page 123456 --body "<p>Updated content</p>"
 
-# Create folder structure
+# Create a true folder
 /create-folder --space DEV --title "Documentation"
 
-# Search for pages
+# Search for pages (includes parent info)
 /search-content "authentication" --space DEV
+
+# Delete a page or folder
+/delete-page --id 123456
 ```
 
 **Requirements:**
