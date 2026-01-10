@@ -1,0 +1,16 @@
+{
+  "name": "ericfisherdev-plugins",
+  "owner": {
+    "name": "ericfisherdev"
+  },
+  "description": "QOL plugins for Claude Code by ericfisherdev",
+  "plugins": [
+    {
+      "name": "jira-tools",
+      "source": "./plugins/jira-tools",
+      "description": "Jira integration tools for token-efficient issue retrieval with truncation options",
+      "version": "1.0.0",
+      "keywords": ["jira", "atlassian", "issues", "tickets", "workflow", "project-management"]
+    }
+  ]
+}

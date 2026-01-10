@@ -1,0 +1,10 @@
+{
+  "name": "jira-tools",
+  "version": "1.0.0",
+  "description": "Jira integration tools for fetching and managing issue information efficiently",
+  "author": {
+    "name": "MBC Development Team"
+  },
+  "license": "MIT",
+  "keywords": ["jira", "atlassian", "issues", "tickets", "workflow", "project-management"]
+}
