@@ -45,6 +45,7 @@ SHARED_DIR = SCRIPT_DIR.parent.parent.parent / "shared"
 sys.path.insert(0, str(SHARED_DIR))
 
 from jira_cache import JiraCache
+from markdown_to_adf import markdown_to_adf
 
 
 def get_auth_header() -> str:
@@ -84,17 +85,7 @@ def create_issue(
     }
 
     if description:
-        # Convert to Atlassian Document Format
-        fields["description"] = {
-            "type": "doc",
-            "version": 1,
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [{"type": "text", "text": description}]
-                }
-            ]
-        }
+        fields["description"] = markdown_to_adf(description)
 
     if priority_id:
         fields["priority"] = {"id": priority_id}

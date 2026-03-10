@@ -45,6 +45,7 @@ SHARED_DIR = SCRIPT_DIR.parent.parent.parent / "shared"
 sys.path.insert(0, str(SHARED_DIR))
 
 from jira_cache import JiraCache
+from markdown_to_adf import markdown_to_adf
 
 
 def get_auth_header() -> str:
@@ -131,18 +132,7 @@ def transition_issue(issue_key: str, transition_id: str) -> None:
 
 def add_comment(issue_key: str, comment_text: str) -> dict:
     """Add a comment to an issue."""
-    body = {
-        "body": {
-            "type": "doc",
-            "version": 1,
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [{"type": "text", "text": comment_text}]
-                }
-            ]
-        }
-    }
+    body = {"body": markdown_to_adf(comment_text)}
     return api_request(f"/rest/api/3/issue/{issue_key}/comment", method="POST", data=body)
 
 
@@ -313,16 +303,7 @@ def main():
 
         # Description
         if args.description:
-            fields_to_update["description"] = {
-                "type": "doc",
-                "version": 1,
-                "content": [
-                    {
-                        "type": "paragraph",
-                        "content": [{"type": "text", "text": args.description}]
-                    }
-                ]
-            }
+            fields_to_update["description"] = markdown_to_adf(args.description)
             changes.append("description")
 
         # Priority

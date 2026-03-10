@@ -18,10 +18,18 @@ import os
 import re
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
+
+# Add shared module to path
+SCRIPT_DIR = Path(__file__).parent
+SHARED_DIR = SCRIPT_DIR.parent.parent.parent / "shared"
+sys.path.insert(0, str(SHARED_DIR))
+
+from markdown_to_adf import markdown_to_adf
 
 
 def get_auth_header() -> str:
@@ -150,16 +158,7 @@ def add_worklog(
     }
 
     if comment:
-        payload["comment"] = {
-            "type": "doc",
-            "version": 1,
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [{"type": "text", "text": comment}]
-                }
-            ]
-        }
+        payload["comment"] = markdown_to_adf(comment)
 
     # Build query params for estimate adjustment
     params = []

@@ -22,6 +22,13 @@ from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
+# Add shared module to path
+SCRIPT_DIR = Path(__file__).parent
+SHARED_DIR = SCRIPT_DIR.parent.parent.parent / "shared"
+sys.path.insert(0, str(SHARED_DIR))
+
+from markdown_to_adf import markdown_to_adf
+
 
 def get_auth_header() -> str:
     """Generate Basic Auth header from environment variables."""
@@ -137,16 +144,7 @@ def create_issue_link(
     }
 
     if comment:
-        payload["comment"] = {
-            "type": "doc",
-            "version": 1,
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [{"type": "text", "text": comment}]
-                }
-            ]
-        }
+        payload["comment"] = markdown_to_adf(comment)
 
     api_request("/rest/api/3/issueLink", method="POST", data=payload)
 
