@@ -226,6 +226,7 @@ def _parse_blocks(text: str) -> list[dict]:
             blocks.append(
                 {
                     "type": "orderedList",
+                    "attrs": {"order": 1},
                     "content": [
                         {
                             "type": "listItem",

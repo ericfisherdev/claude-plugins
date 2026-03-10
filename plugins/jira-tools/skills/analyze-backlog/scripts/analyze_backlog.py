@@ -223,6 +223,7 @@ def text_to_adf(text: str) -> dict:
                 i += 1
             content.append({
                 "type": "orderedList",
+                "attrs": {"order": 1},
                 "content": list_items
             })
             continue
