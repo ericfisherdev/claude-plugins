@@ -20,7 +20,7 @@ claude plugins:add ericfisherdev-plugins/jira-tools
 
 | Plugin | Description | Version |
 |--------|-------------|---------|
-| [jira-tools](#jira-tools) | Jira integration tools for issues, sprints, and agile workflows | 1.3.0 |
+| [jira-tools](#jira-tools) | Jira integration tools for issues, sprints, and agile workflows | 1.3.2 |
 | [confluence-tools](#confluence-tools) | Confluence integration tools for token-efficient page and folder management with caching | 1.2.1 |
 
 ---

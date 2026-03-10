@@ -22,3 +22,5 @@ Thumbs.db
 # Local development
 .env
 *.local
+claudefluence/adapters/__init__.py
+/claudefluence
