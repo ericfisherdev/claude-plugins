@@ -1,0 +1,19 @@
+{
+  "name": "github-tools",
+  "version": "1.0.0",
+  "description": "GitHub integration tools for PR lifecycle management, review automation, and repository workflows",
+  "author": {
+    "name": "MBC Development Team"
+  },
+  "license": "MIT",
+  "keywords": [
+    "github",
+    "pull-requests",
+    "code-review",
+    "ci-cd",
+    "merge",
+    "rebase",
+    "workflow",
+    "automation"
+  ]
+}

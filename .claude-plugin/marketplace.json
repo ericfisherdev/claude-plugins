@@ -22,9 +22,9 @@
     {
       "name": "github-tools",
       "source": "./plugins/github-tools",
-      "description": "Github integration tools for prs, issues, and change requests",
-      "version": "1.3.0",
-      "keywords": ["git", "github", "pull requests"]
+      "description": "GitHub integration tools for PR lifecycle management, review automation, and repository workflows",
+      "version": "1.0.0",
+      "keywords": ["github", "pull-requests", "code-review", "ci-cd", "merge", "rebase", "workflow", "automation"]
     }
   ]
 }

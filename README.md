@@ -22,6 +22,7 @@ claude plugins:add ericfisherdev-plugins/jira-tools
 |--------|-------------|---------|
 | [jira-tools](#jira-tools) | Jira integration tools for issues, sprints, and agile workflows | 1.3.2 |
 | [confluence-tools](#confluence-tools) | Confluence integration tools for token-efficient page and folder management with caching | 1.2.1 |
+| [github-tools](#github-tools) | GitHub integration tools for PR lifecycle management, review automation, and repository workflows | 1.0.0 |
 
 ---
 
@@ -158,6 +159,41 @@ Confluence integration tools for managing wiki pages and folders efficiently. Us
 ```
 ~/.confluence-tools-cache.json
 ```
+
+---
+
+### github-tools
+
+GitHub integration tools for PR lifecycle management, review automation, and repository workflows.
+
+**Skills:**
+
+| Skill | Description |
+|-------|-------------|
+| `/review-watch` | Monitor PRs and automatically manage their lifecycle — fix CI, respond to reviews, rebase, and merge |
+
+**Features:**
+- Automated PR lifecycle management (draft → review → merge)
+- CI failure diagnosis and auto-fix for draft PRs
+- Automatic rebase when base branch is merged into main
+- Review comment response with apply/decline actions
+- CodeRabbit rate limit handling
+- Multi-PR and single-PR watch modes
+- Worktree-based isolation for concurrent PR processing
+
+**Usage Examples:**
+
+```bash
+# Watch all your open PRs
+/review-watch
+
+# Watch a specific PR
+/review-watch 42
+/review-watch https://github.com/owner/repo/pull/42
+```
+
+**Requirements:**
+- GitHub CLI (`gh`) authenticated with repo access
 
 ---
 
